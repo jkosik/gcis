@@ -15,10 +15,11 @@ import (
 	"github.com/xanzy/go-gitlab"
 )
 
-var currentTime string
+var currentTimeStamp string
 
 func main() {
-	currentTime := timeStamp()
+	timeStamp()
+
 	// CLI Flag parsing
 	fileName := flag.String("file", ".gitlab-ci.yml", "Filename to dump from Git repo")
 	gitRef := flag.String("ref", "main", "Git Ref (Branch, Tag, Commit) to dump data from")
@@ -136,8 +137,8 @@ func main() {
 	fmt.Println("")
 
 	// Save scrape results to file
-	outputFileName := "imagelist-" + currentTime + ".md"
-	f, err := os.Create(outputFileName)
+	imageListFileName := "imagelist-" + currentTimeStamp + ".md"
+	f, err := os.Create(imageListFileName)
 	check(err)
 
 	defer f.Close()
@@ -154,7 +155,8 @@ func main() {
 		}
 		fmt.Printf("")
 	}
-	fmt.Printf("Image list saved as ./%s \n", outputFileName)
+	fmt.Printf("")
+	fmt.Printf("Image list saved as ./%s \n", imageListFileName)
 	fmt.Printf("")
 
 	// Run Trivy
@@ -169,9 +171,9 @@ func check(e error) {
 	}
 }
 
-func timeStamp() string {
+func timeStamp() {
 	ts := time.Now().UTC().Format(time.RFC3339)
-	return strings.Replace(strings.Replace(ts, ":", "", -1), "-", "", -1)
+	currentTimeStamp = strings.Replace(strings.Replace(ts, ":", "", -1), "-", "", -1)
 }
 
 func checkTrivy() {
@@ -188,8 +190,9 @@ func checkTrivy() {
 }
 
 func runTrivy() {
-
-	cmd := exec.Command("trivy", "image", "-s", "HIGH,CRITICAL", "-f", "table", "-o", "scan"+currentTime, "nginx")
+	scanFileName := "scan-" + currentTimeStamp
+	args := []string{"image", "-s", "HIGH,CRITICAL", "-f", "table", "-o", scanFileName, "nginx"}
+	cmd := exec.Command("trivy", args...)
 
 	cmdOut, err := cmd.Output()
 	if err != nil {
