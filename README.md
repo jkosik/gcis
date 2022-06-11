@@ -4,19 +4,17 @@
 - executes security scan
 - provide reports
 
-### Workflow
+### Usage
 1. Compile
 ```
 go mod init gcis
 go get -d ./...
 go build
 ```
-
 2. Generate your GitLab Personal Access Token and export
 ```
 export GITLAB_PAT="abc123"
 ```
-
 3. Run `gcis`
 ```
 ❯ ./gcis -h
@@ -28,8 +26,6 @@ Usage of ./gcis:
   -trivy
         Enable trivy scan
 ```
-
-4. Process report
-`gcis` creates:
+4. Check `gcis` reports
 - `imagelist-TIMESTAMP.md` listing all identified images
 - `scan-TIMESTAMP.md` reporting image vulnerabilities
