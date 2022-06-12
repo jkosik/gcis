@@ -6,12 +6,12 @@
   - List of Docker images per Gitlab Project
   - Scan results of unique Docker Images
 
+## Demo
 ![](readme.gif)
-
+  
 ### Usage
 1. Compile
 ```
-go mod init gcis
 go get -d ./...
 go build
 ```
