@@ -106,3 +106,5 @@ Trivy scans saved to scans-* directory. Empty scan results and failed scans have
   
   ### Further information
 - Mind rate-limits on image pulls
+- Omitting `-trivy` populates Docker image list only
+- Trivy scans expect [Trivy installed on your system](https://aquasecurity.github.io/trivy/v0.28.1/getting-started/installation/).
