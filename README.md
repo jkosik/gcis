@@ -31,10 +31,10 @@ Usage of ./gcis:
 4. Check `gcis` reports
 - `imagelist-TIMESTAMP.md` listing all identified images
 - `scan-TIMESTAMP.md` reporting image vulnerabilities
-
+  
 ### Further information
 - Mind rate-limits on image pulls
-
+  
 ### Sample gcis run
 ```
 ❯ gcis -trivy
@@ -98,4 +98,6 @@ haproxy:lts-bullseye (debian 11.3)
 Total: 16 (HIGH: 13, CRITICAL: 3)
 
 ...snipped...
+
+Trivy scans saved to scans-* directory. Empty scan results and failed scans have been removed.
 ```
