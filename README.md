@@ -1,10 +1,10 @@
 ## gitlab-ci-image-scanner (gcis)
-- scrapes all GitLab `gitlab-ci.yml` files in all Groups & Projects API token has access to.
-- identifies Docker images in use
-- executes security scan
-- provide reports
-  - list on Docker images pre Gitlab Project
-  - scan results of unique Docker Images
+- Scrapes all GitLab `gitlab-ci.yml` files in all Groups API token has access to
+- Identifies Docker images in use
+- Executes security scan
+- Provides reports
+  - List of Docker images per Gitlab Project
+  - Scan results of unique Docker Images
 
 ### Usage
 1. Compile
@@ -13,10 +13,12 @@ go mod init gcis
 go get -d ./...
 go build
 ```
+  
 2. Generate your GitLab Personal Access Token and export
 ```
 export GITLAB_PAT="abc123"
 ```
+  
 3. Run `gcis`
 ```
 ❯ ./gcis -h
@@ -28,12 +30,10 @@ Usage of ./gcis:
   -trivy
         Enable trivy scan
 ```
+  
 4. Check `gcis` reports
 - `imagelist-TIMESTAMP.md` listing all identified images
 - `scan-TIMESTAMP.md` reporting image vulnerabilities
-  
-### Further information
-- Mind rate-limits on image pulls
   
 ### Sample gcis run
 ```
@@ -101,3 +101,6 @@ Total: 16 (HIGH: 13, CRITICAL: 3)
 
 Trivy scans saved to scans-* directory. Empty scan results and failed scans have been removed.
 ```
+  
+  ### Further information
+- Mind rate-limits on image pulls
