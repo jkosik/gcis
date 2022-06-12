@@ -6,6 +6,8 @@
   - List of Docker images per Gitlab Project
   - Scan results of unique Docker Images
 
+![](readme.gif)
+
 ### Usage
 1. Compile
 ```
