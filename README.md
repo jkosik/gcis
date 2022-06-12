@@ -1,8 +1,10 @@
 ## gitlab-ci-image-scanner (gcis)
-- scrapes all GitLab `gitlab-ci.yml` files
+- scrapes all GitLab `gitlab-ci.yml` files in all Groups & Projects API token has access to.
 - identifies Docker images in use
 - executes security scan
 - provide reports
+  - list on Docker images pre Gitlab Project
+  - scan results of unique Docker Images
 
 ### Usage
 1. Compile
@@ -29,3 +31,6 @@ Usage of ./gcis:
 4. Check `gcis` reports
 - `imagelist-TIMESTAMP.md` listing all identified images
 - `scan-TIMESTAMP.md` reporting image vulnerabilities
+
+### Further information
+- Mind rate-limits on image pulls

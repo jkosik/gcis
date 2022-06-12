@@ -16,6 +16,7 @@ import (
 )
 
 var currentTimeStamp string
+var scanDirName string
 
 func main() {
 	timeStamp()
@@ -61,7 +62,7 @@ func main() {
 	var webUrls []string // e.g. https://gitlab.com/jkosik/ci-snippets
 	for i, _ := range projects {
 		//fmt.Println(i, p, "\n")
-		fmt.Printf("Project webUrl found: %s \n", projects[i].WebURL)
+		fmt.Printf("Project found, webUrl: %s \n", projects[i].WebURL)
 		webUrls = append(webUrls, projects[i].WebURL)
 	}
 
@@ -100,6 +101,8 @@ func main() {
 
 	// Scarping all "image" directives from file
 	imageMap := make(map[string][]string) // map of slices, e.g. {"url": {"image1", "image2"}
+	var allImages []string
+	var uniqueImages []string
 	for url, rawurl := range liveRawUrls {
 		fmt.Println("Scraping ", url, rawurl)
 		resp, err := http.Get(rawurl)
@@ -124,11 +127,17 @@ func main() {
 		// Saving clean image names into imageMap
 		for _, imageFullLine := range validImages {
 			imageNameWhitespaced := strings.ReplaceAll(imageFullLine, "image:", "")
+
 			// fmt.Println(imageFullLine)
 			imageName := strings.ReplaceAll(imageNameWhitespaced, " ", "")
+
 			// fmt.Println(imageName)
 			// Populate map of urls and corresponding slice of images found in the scraped file
 			imageMap[url] = append(imageMap[url], imageName)
+
+			// Store all images as flat slice and remove duplicates
+			allImages = append(allImages, imageName)
+			uniqueImages = unique(allImages)
 		}
 
 		defer resp.Body.Close()
@@ -155,14 +164,29 @@ func main() {
 		}
 		fmt.Printf("")
 	}
-	fmt.Printf("")
-	fmt.Printf("Image list saved as ./%s \n", imageListFileName)
-	fmt.Printf("")
+
+	fmt.Println("")
+	fmt.Printf("Image list saved to ./%s \n", imageListFileName)
+	fmt.Println("")
 
 	// Run Trivy
 	if *trivy {
-		runTrivy()
+		// Prepare scans directory
+		//os.RemoveAll("scans")
+		scanDirName = "scans-" + currentTimeStamp
+		err := os.Mkdir(scanDirName, 0755)
+		check(err)
+
+		fmt.Println("Running Trivy scans...")
+		fmt.Println("")
+		for _, image := range uniqueImages {
+			runTrivy(image)
+		}
+
+		fmt.Println("Trivy scans saved to scans-* directory. Empty scan results and failed scans have been removed.")
+
 	}
+
 }
 
 func check(e error) {
@@ -174,6 +198,19 @@ func check(e error) {
 func timeStamp() {
 	ts := time.Now().UTC().Format(time.RFC3339)
 	currentTimeStamp = strings.Replace(strings.Replace(ts, ":", "", -1), "-", "", -1)
+}
+
+func unique(inputSlice []string) []string {
+	keys := make(map[string]bool)
+	uniqueSlice := []string{}
+
+	for _, entry := range inputSlice {
+		if _, value := keys[entry]; !value {
+			keys[entry] = true
+			uniqueSlice = append(uniqueSlice, entry)
+		}
+	}
+	return uniqueSlice
 }
 
 func checkTrivy() {
@@ -189,25 +226,28 @@ func checkTrivy() {
 	fmt.Println("")
 }
 
-func runTrivy() {
-	scanFileName := "scan-" + currentTimeStamp
-	args := []string{"image", "-s", "HIGH,CRITICAL", "-f", "table", "-o", scanFileName, "nginx"}
+func runTrivy(image string) {
+	fmt.Printf("\u21BB Scanning %s...\n", image)
+	fmt.Println("")
+	scanFilePath := scanDirName + "/scan-" + currentTimeStamp + "-" + image
+	args := []string{"image", "-s", "HIGH,CRITICAL", "-f", "table", "-o", scanFilePath, image}
 	cmd := exec.Command("trivy", args...)
 
 	cmdOut, err := cmd.Output()
 	if err != nil {
-		switch e := err.(type) {
-		case *exec.Error:
-			fmt.Println(err)
-		case *exec.ExitError:
-			fmt.Println("command exit rc =", e.ExitCode())
-		default:
-			panic(err)
-		}
+		fmt.Printf("Unable not scan image: %s\n", image)
 	}
 
 	fmt.Println(string(cmdOut))
+
+	// Delete empty files (failed scans or empty results)
+	fi, err := os.Stat(scanFilePath)
+	check(err)
+	if fi.Size() == 0 {
+		err := os.Remove(scanFilePath)
+		check(err)
+	}
+
 }
 
-//check error as function
-// run trivy in loop - separate files? report misses timestamp
+// check error as function
