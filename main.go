@@ -145,7 +145,7 @@ func main() {
 
 	fmt.Println("")
 
-	// Save scrape results to file
+	// Save detected images per project to file
 	imageListFileName := "imagelist-" + currentTimeStamp + ".md"
 	f, err := os.Create(imageListFileName)
 	check(err)
