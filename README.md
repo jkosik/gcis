@@ -36,6 +36,11 @@ Usage of ./gcis:
 4. Check `gcis` reports
 - `imagelist-TIMESTAMP.md` listing all identified images
 - `scan-TIMESTAMP.md` reporting image vulnerabilities
+
+Optionally install directly as:
+```
+go install github.com/jkosik/gcis@latest
+```
   
 ### Sample gcis run
 ```

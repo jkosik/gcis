@@ -1,4 +1,4 @@
-module gcis
+module github.com/jkosik/gcis
 
 go 1.17
 
