@@ -18,7 +18,7 @@ go build
   
 2. Generate your GitLab Personal Access Token and export
 ```
-export GITLAB_PAT="abc123"
+export GCIS_PAT="abc123"
 ```
   
 3. Run `gcis`
