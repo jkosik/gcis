@@ -28,14 +28,12 @@ func main() {
 
 	flag.Parse()
 
-	// Check GITLAB_PAT env
-	pat, pat_present := os.LookupEnv("GCIS_PAT")
+	pat, pat_present := os.LookupEnv("GITLAB_PAT")
 	if !pat_present {
-		fmt.Println("GCIS_PAT environment does not exist. Please generate GitLab Personal Access Token and export as GCIS_PAT")
+		fmt.Println("GITLAB_PAT environment does not exist. Please generate GitLab Personal Access Token and export as GITLAB_PAT")
 		os.Exit(1)
 	}
 
-	// Check if Trivy is installed
 	if *trivy {
 		checkTrivy()
 	}
@@ -46,10 +44,9 @@ func main() {
 		log.Fatalf("Failed to create client: %v", err)
 	}
 
-	// List Gitlab projects and grab Project's webUrls.
+	// List Gitlab projects
 	opt := &gitlab.ListProjectsOptions{
-		Owned:   gitlab.Bool(true),
-		OrderBy: gitlab.String("path"),
+		Archived: gitlab.Bool(true),
 	}
 	projects, _, err := git.Projects.ListProjects(opt)
 	if err != nil {
@@ -59,8 +56,9 @@ func main() {
 	fmt.Printf("Scanning files: \"%s\" in Git Refs: \"%s\" \n", *fileName, *gitRef)
 	fmt.Println("")
 
-	var webUrls []string // e.g. https://gitlab.com/jkosik/ci-snippets
+	var webUrls []string
 	for i, _ := range projects {
+
 		//fmt.Println(i, p, "\n")
 		fmt.Printf("Project found, webUrl: %s \n", projects[i].WebURL)
 		webUrls = append(webUrls, projects[i].WebURL)
@@ -73,10 +71,10 @@ func main() {
 	liveRawUrls := make(map[string]string)
 
 	for i, _ := range webUrls {
+		// rawUrl = webUrl/-/raw/main/.gitlab-ci.yml
 		rawUrl := webUrls[i] + "/-/raw/" + *gitRef + "/" + *fileName
-		// webURL used as a rawUrls map Key
-		// rawURL used as a rawUrls map Value
-		// e.g. {url: url/-/raw/main/.gitlab-ci.yml}
+		// rawUrls Key = webUrl
+		// rawUrls Value = rawUrl
 		url := webUrls[i]
 		rawUrls[url] = rawUrl
 
@@ -115,10 +113,6 @@ func main() {
 			log.Fatal(err)
 		}
 
-		// Print scraped file
-		// fmt.Println(string(b))
-
-		// Relying on Gitlab and Yaml syntax. Evaulating only viable options.
 		// No non-whitespace chars before "image:" (skips also commented lines).
 		// 1+ whitespaces needed after "image:"
 		regexp, _ := regexp.Compile(`(?m)^\s*image:\s+\S+`)
@@ -171,7 +165,7 @@ func main() {
 
 	// Run Trivy
 	if *trivy {
-		// Prepare scans directory
+
 		//os.RemoveAll("scans")
 		scanDirName = "scans-" + currentTimeStamp
 		err := os.Mkdir(scanDirName, 0755)
@@ -249,5 +243,3 @@ func runTrivy(image string) {
 	}
 
 }
-
-// check error as function
